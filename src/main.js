@@ -1,7 +1,11 @@
 document.addEventListener('DOMContentLoaded', () => {
 
   // --- 1. ИНИЦИАЛИЗАЦИЯ ---
-  lucide.createIcons();
+  // Проверяем, подключена ли библиотека Lucide
+  if (typeof lucide !== 'undefined') {
+      lucide.createIcons();
+  }
+
   gsap.registerPlugin(ScrollTrigger);
 
   // Плавный скролл
@@ -16,122 +20,126 @@ document.addEventListener('DOMContentLoaded', () => {
   }
   requestAnimationFrame(raf);
 
-  // --- 2. HERO АНИМАЦИЯ (CANVAS NETWORK) ---
+  // --- 2. HERO АНИМАЦИЯ (Только если есть Canvas) ---
   const canvas = document.getElementById('heroCanvas');
-  const ctx = canvas.getContext('2d');
-  let width, height;
-  let particles = [];
 
-  // Настройки анимации
-  const config = {
-      particleColor: 'rgba(204, 255, 0, 0.5)', // Наш Lime Green
-      lineColor: 'rgba(204, 255, 0, 0.15)',
-      particleAmount: 60, // Количество точек
-      defaultSpeed: 0.5,
-      variantSpeed: 1,
-      linkRadius: 150 // Радиус соединения линий
-  };
+  // 🔥 ВАЖНОЕ ИСПРАВЛЕНИЕ: Проверка существования канваса
+  if (canvas) {
+      const ctx = canvas.getContext('2d');
+      let width, height;
+      let particles = [];
 
-  function resize() {
-      width = canvas.width = window.innerWidth;
-      height = canvas.height = window.innerHeight;
-  }
+      const config = {
+          particleColor: 'rgba(204, 255, 0, 0.5)',
+          lineColor: 'rgba(204, 255, 0, 0.15)',
+          particleAmount: 60,
+          defaultSpeed: 0.5,
+          linkRadius: 150
+      };
 
-  class Particle {
-      constructor() {
-          this.x = Math.random() * width;
-          this.y = Math.random() * height;
-          this.vx = (Math.random() - 0.5) * config.defaultSpeed;
-          this.vy = (Math.random() - 0.5) * config.defaultSpeed;
-          this.size = Math.random() * 2 + 1;
+      function resize() {
+          width = canvas.width = window.innerWidth;
+          height = canvas.height = window.innerHeight;
       }
 
-      update() {
-          this.x += this.vx;
-          this.y += this.vy;
+      class Particle {
+          constructor() {
+              this.x = Math.random() * width;
+              this.y = Math.random() * height;
+              this.vx = (Math.random() - 0.5) * config.defaultSpeed;
+              this.vy = (Math.random() - 0.5) * config.defaultSpeed;
+              this.size = Math.random() * 2 + 1;
+          }
 
-          // Отталкивание от краев
-          if (this.x > width) this.vx *= -1;
-          if (this.x < 0) this.vx *= -1;
-          if (this.y > height) this.vy *= -1;
-          if (this.y < 0) this.vy *= -1;
-      }
+          update() {
+              this.x += this.vx;
+              this.y += this.vy;
 
-      draw() {
-          ctx.beginPath();
-          ctx.arc(this.x, this.y, this.size, 0, Math.PI * 2);
-          ctx.fillStyle = config.particleColor;
-          ctx.fill();
-      }
-  }
+              if (this.x > width) this.vx *= -1;
+              if (this.x < 0) this.vx *= -1;
+              if (this.y > height) this.vy *= -1;
+              if (this.y < 0) this.vy *= -1;
+          }
 
-  function initParticles() {
-      particles = [];
-      // Адаптивное количество частиц
-      const amount = window.innerWidth < 768 ? 30 : config.particleAmount;
-      for (let i = 0; i < amount; i++) {
-          particles.push(new Particle());
-      }
-  }
-
-  function animateParticles() {
-      ctx.clearRect(0, 0, width, height);
-
-      for (let i = 0; i < particles.length; i++) {
-          let p1 = particles[i];
-          p1.update();
-          p1.draw();
-
-          // Соединяем линиями
-          for (let j = i + 1; j < particles.length; j++) {
-              let p2 = particles[j];
-              let distance = Math.sqrt((p1.x - p2.x)**2 + (p1.y - p2.y)**2);
-
-              if (distance < config.linkRadius) {
-                  ctx.beginPath();
-                  ctx.strokeStyle = config.lineColor;
-                  ctx.lineWidth = 1;
-                  ctx.moveTo(p1.x, p1.y);
-                  ctx.lineTo(p2.x, p2.y);
-                  ctx.stroke();
-              }
+          draw() {
+              ctx.beginPath();
+              ctx.arc(this.x, this.y, this.size, 0, Math.PI * 2);
+              ctx.fillStyle = config.particleColor;
+              ctx.fill();
           }
       }
-      requestAnimationFrame(animateParticles);
+
+      function initParticles() {
+          particles = [];
+          const amount = window.innerWidth < 768 ? 30 : config.particleAmount;
+          for (let i = 0; i < amount; i++) {
+              particles.push(new Particle());
+          }
+      }
+
+      function animateParticles() {
+          ctx.clearRect(0, 0, width, height);
+
+          for (let i = 0; i < particles.length; i++) {
+              let p1 = particles[i];
+              p1.update();
+              p1.draw();
+
+              for (let j = i + 1; j < particles.length; j++) {
+                  let p2 = particles[j];
+                  let distance = Math.sqrt((p1.x - p2.x)**2 + (p1.y - p2.y)**2);
+
+                  if (distance < config.linkRadius) {
+                      ctx.beginPath();
+                      ctx.strokeStyle = config.lineColor;
+                      ctx.lineWidth = 1;
+                      ctx.moveTo(p1.x, p1.y);
+                      ctx.lineTo(p2.x, p2.y);
+                      ctx.stroke();
+                  }
+              }
+          }
+          requestAnimationFrame(animateParticles);
+      }
+
+      window.addEventListener('resize', () => { resize(); initParticles(); });
+      resize();
+      initParticles();
+      animateParticles();
+
+      // Hero контент (появляется только на главной)
+      gsap.from('.hero__content > *', {
+          y: 30,
+          opacity: 0,
+          duration: 1,
+          stagger: 0.2,
+          delay: 0.2,
+          ease: 'power3.out'
+      });
   }
 
-  // Запуск анимации Hero
-  window.addEventListener('resize', () => { resize(); initParticles(); });
-  resize();
-  initParticles();
-  animateParticles();
-
-
-  // --- 3. ИСПРАВЛЕННАЯ АНИМАЦИЯ ПОЯВЛЕНИЯ (GSAP) ---
-
-  // Анимация заголовков и текстов
+  // --- 3. АНИМАЦИЯ СЕКЦИЙ (GSAP) ---
   const fadeElements = document.querySelectorAll('.section-title, .section-subtitle, .about__text, .innovations__content');
-
-  fadeElements.forEach(el => {
-      gsap.fromTo(el,
-          { y: 50, opacity: 0 }, // Начальное состояние
-          {
-              y: 0,
-              opacity: 1,
-              duration: 0.8,
-              ease: 'power2.out',
-              scrollTrigger: {
-                  trigger: el,
-                  start: 'top 90%', // Начинаем раньше (когда элемент на 90% экрана)
-                  toggleActions: 'play none none none' // Проигрываем 1 раз и не скрываем обратно
+  if (fadeElements.length > 0) {
+      fadeElements.forEach(el => {
+          gsap.fromTo(el,
+              { y: 50, opacity: 0 },
+              {
+                  y: 0,
+                  opacity: 1,
+                  duration: 0.8,
+                  ease: 'power2.out',
+                  scrollTrigger: {
+                      trigger: el,
+                      start: 'top 90%',
+                      toggleActions: 'play none none none'
+                  }
               }
-          }
-      );
-  });
+          );
+      });
+  }
 
-  // Анимация карточек (Гриды) - Programs, Mentors, Blog
   const grids = ['.programs__grid', '.mentors__grid', '.blog__grid', '.numbers__grid', '.steps'];
-
   grids.forEach(selector => {
       const grid = document.querySelector(selector);
       if (grid) {
@@ -141,7 +149,7 @@ document.addEventListener('DOMContentLoaded', () => {
                   y: 0,
                   opacity: 1,
                   duration: 0.6,
-                  stagger: 0.15, // Задержка между карточками
+                  stagger: 0.15,
                   ease: 'back.out(1.2)',
                   scrollTrigger: {
                       trigger: grid,
@@ -153,42 +161,32 @@ document.addEventListener('DOMContentLoaded', () => {
       }
   });
 
-  // Hero контент (появляется сразу)
-  gsap.from('.hero__content > *', {
-      y: 30,
-      opacity: 0,
-      duration: 1,
-      stagger: 0.2,
-      delay: 0.2,
-      ease: 'power3.out'
-  });
-
-
-  // --- 4. МОБИЛЬНОЕ МЕНЮ ---
+  // --- 4. МОБИЛЬНОЕ МЕНЮ (Работает везде) ---
   const burger = document.querySelector('.header__burger');
   const nav = document.querySelector('.header__nav');
   const navLinks = document.querySelectorAll('.header__link');
   const body = document.body;
 
-  burger.addEventListener('click', () => {
-      burger.classList.toggle('is-active');
-      nav.classList.toggle('is-active');
-      body.classList.toggle('no-scroll');
-  });
-
-  navLinks.forEach(link => {
-      link.addEventListener('click', () => {
-          burger.classList.remove('is-active');
-          nav.classList.remove('is-active');
-          body.classList.remove('no-scroll');
+  if (burger && nav) {
+      burger.addEventListener('click', () => {
+          burger.classList.toggle('is-active');
+          nav.classList.toggle('is-active');
+          body.classList.toggle('no-scroll');
       });
-  });
+
+      navLinks.forEach(link => {
+          link.addEventListener('click', () => {
+              burger.classList.remove('is-active');
+              nav.classList.remove('is-active');
+              body.classList.remove('no-scroll');
+          });
+      });
+  }
 
   // --- 5. ХЕДЕР ПРИ СКРОЛЛЕ ---
   let lastScroll = 0;
   const header = document.querySelector('.header');
 
-  // Используем нативный скролл ивент для надежности, если Lenis заглючит
   window.addEventListener('scroll', () => {
       const currentScroll = window.scrollY;
       if (currentScroll > lastScroll && currentScroll > 100) {
@@ -204,7 +202,6 @@ document.addEventListener('DOMContentLoaded', () => {
   document.querySelectorAll('.accordion__trigger').forEach(btn => {
       btn.addEventListener('click', () => {
           const item = btn.parentElement;
-          // Закрыть остальные
           document.querySelectorAll('.accordion__item').forEach(i => {
               if (i !== item) i.classList.remove('is-open');
           });
@@ -212,7 +209,7 @@ document.addEventListener('DOMContentLoaded', () => {
       });
   });
 
-  // Форма
+  // Форма (Только если есть на странице)
   const form = document.getElementById('contactForm');
   if (form) {
       form.addEventListener('submit', (e) => {

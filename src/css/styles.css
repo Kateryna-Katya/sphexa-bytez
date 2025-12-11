@@ -530,6 +530,109 @@ img { max-width: 100%; display: block; }
 .footer__contact-item svg { width: 18px; height: 18px; color: var(--c-primary); flex-shrink: 0; }
 
 
-display: grid;
-grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
-gap: 30px;
+/* =========================================
+   9. LEGAL PAGES STYLING (.pages)
+   ========================================= */
+
+/* Фон секции с отступом от хедера */
+.pages {
+  padding-top: calc(var(--header-height) + 60px);
+  min-height: 80vh;
+}
+
+/* Контейнер для текста (чуть уже основного для удобства чтения) */
+.pages__content {
+  background: var(--c-surface);
+  padding: 40px;
+  border-radius: var(--radius-md);
+  border: 1px solid var(--c-border);
+  box-shadow: 0 4px 20px rgba(0,0,0,0.2);
+}
+
+/* Заголовок H1 */
+.pages__content h1 {
+  font-family: var(--f-heading);
+  font-size: 2.5rem;
+  color: var(--c-text-main);
+  margin-bottom: 10px;
+  line-height: 1.1;
+}
+
+/* Дата обновления */
+.pages__updated {
+  color: var(--c-text-muted);
+  font-size: 0.9rem;
+  margin-bottom: 40px;
+  padding-bottom: 20px;
+  border-bottom: 1px solid var(--c-border);
+}
+
+/* Заголовки H2 внутри текста */
+.pages__content h2 {
+  font-family: var(--f-heading);
+  font-size: 1.5rem;
+  color: var(--c-primary); /* Лаймовый акцент */
+  margin-top: 40px;
+  margin-bottom: 20px;
+}
+
+/* Обычный текст */
+.pages__content p {
+  color: var(--c-text-main);
+  font-size: 1rem;
+  line-height: 1.7;
+  margin-bottom: 20px;
+  opacity: 0.9;
+}
+
+/* Списки */
+.pages__content ul {
+  list-style: none;
+  margin-bottom: 20px;
+  padding-left: 10px;
+}
+
+.pages__content ul li {
+  position: relative;
+  padding-left: 25px;
+  margin-bottom: 15px;
+  color: var(--c-text-muted);
+  line-height: 1.6;
+}
+
+/* Маркеры списка (стрелочки) */
+.pages__content ul li::before {
+  content: '→';
+  position: absolute;
+  left: 0;
+  top: 0px;
+  color: var(--c-primary);
+  font-weight: bold;
+}
+
+.pages__content ul li strong {
+  color: var(--c-text-main);
+  font-weight: 600;
+}
+
+/* Ссылки внутри текста */
+.pages__content a {
+  color: var(--c-primary);
+  text-decoration: none;
+  border-bottom: 1px solid transparent;
+  transition: 0.3s;
+}
+
+.pages__content a:hover {
+  border-bottom-color: var(--c-primary);
+}
+
+/* Адаптив для мобильных */
+@media (max-width: 768px) {
+  .pages__content {
+      padding: 25px;
+  }
+  .pages__content h1 {
+      font-size: 1.8rem;
+  }
+}
